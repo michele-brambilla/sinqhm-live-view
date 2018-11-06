@@ -32,10 +32,10 @@ class SINQHMError(Exception):
 
 
 class CommunicationError(SINQHMError):
-    """Exception to be raised when some hardware communication fails."""
+    """Exception to be raised when some communication fails."""
     category = 'Communication error'
 
 
 class AuthenticationError(SINQHMError):
-    """Exception to be raised when some hardware communication fails."""
+    """Exception to be raised when the authentication fails."""
     category = 'Authentication error'

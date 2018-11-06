@@ -9,7 +9,7 @@ class GracefulKiller:
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
-    def exit_gracefully(self,signum, frame):
+    def exit_gracefully(self, signum, frame):
         print('Gracefully stopping th program, please wait')
         self.kill_now = True
 

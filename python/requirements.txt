@@ -5,4 +5,3 @@ hashlib
 getpass
 requests
 matplotlib
-signal

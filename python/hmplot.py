@@ -1,14 +1,12 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
-from matplotlib import cm
 import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import cm
 
-#matplotlib.use('macosx')
+# matplotlib.use('macosx')
 
 
-class SINQHMView:
-
+class SINQHMViewOrig(object):
     shape = None
 
     def __init__(self, shape):
@@ -17,69 +15,50 @@ class SINQHMView:
         plt.ion()
         plt.show()
 
-    def plot(self,values):
+    def plot(self, values):
         plt.clf()
-        histogram = np.reshape(values,self.shape)
+        histogram = np.reshape(values, self.shape)
         plt.imshow(histogram, cmap=cm.hot, aspect='auto')
         plt.draw()
         plt.pause(0.001)
 
-class SINQHMView1:
-    shape = None
 
-    def __init__(self, values, shape, interval=5000):
-        self.values = values
-        self.shape = shape
-        self.fig = plt.figure()
-        histogram = np.reshape(values, self.shape)
-        self.im = plt.imshow(histogram, animated=True)
+class SINQHMView(object):
+    ani = None
+    im = None
 
-        self.ani = animation.FuncAnimation(self.fig, self._updatefig, interval=interval, blit=True)
-        plt.show()
-
-    def _updatefig(self,values):
-        print('update')
-        print(values[0])
-        histogram = np.reshape(self.values, self.shape)
-        self.im.set_array(histogram)
-        return self.im,
-
-
-class Plotit:
-
-
-
-    def f(self,_x, _y):
+    def f(self, _x, _y):
         return np.sin(_x) + np.cos(_y)
 
-    def _updatefig(self,*args):
-        print('update')
-        self.x += np.pi / 15.
-        self.y += np.pi / 20.
-        self.im.set_array(self.f(self.x, self.y))
+    def _updatefig(self, *args):
+        if self.connection is not None:
+            counts = self.connection.get()
+            print('counts: {}'.format(np.sum(counts)))
+            self.im.set_array(np.reshape(counts, self.shape))
+        else:
+            self.x += np.pi / 15.
+            self.y += np.pi / 20.
+            self.im.set_array(self.f(self.x, self.y))
         return self.im,
 
-    def __init__(self):
+    def __init__(self, connection=None, shape=None):
         self.fig = plt.figure()
-        self.ani = animation.FuncAnimation(self.fig, self._updatefig, interval=50, blit=True)
-        self.x = np.linspace(0, 2 * np.pi, 120)
-        self.y = np.linspace(0, 2 * np.pi, 100).reshape(-1, 1)
+        self.connection = connection
+        self.shape = shape
 
-        self.im = plt.imshow(self.f(self.x, self.y), animated=True)
+    def live(self, interval):
+        self.ani = animation.FuncAnimation(self.fig, self._updatefig, interval=1000 * interval, blit=True)
+        if self.connection is not None:
+            counts = self.connection.get()
+            print('counts: {}'.format(np.sum(counts)))
+            self.im = plt.imshow(np.reshape(counts, self.shape), animated=True, cmap=cm.hot, aspect='auto')
+        else:
+            self.x = np.linspace(0, 2 * np.pi, self.shape[0])
+            self.y = np.linspace(0, 2 * np.pi, self.shape[1]).reshape(-1, 1)
+            self.im = plt.imshow(self.f(self.x, self.y), animated=True)
         plt.show()
-
-
 
 
 if __name__ == '__main__':
-    # from time import sleep
-    #
-    # shape = [10,10]
-    # data = np.zeros(np.prod(shape))
-    # view = SINQHMView1(data,shape,1000)
-    #
-    # for i in range(1,10):
-    #     data = np.random.randint(0, high=10, size=np.prod(shape))
-    #     # view.plot(data)
-    #     sleep(2)
-    plotit = Plotit()
+    p = SINQHMView()
+    p.live(1)

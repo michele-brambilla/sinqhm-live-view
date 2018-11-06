@@ -5,7 +5,12 @@ from requests.auth import HTTPBasicAuth
 import numpy as np
 
 
-class HttpConnector:
+class Connector(object):
+    def get(self, path):
+        pass
+
+
+class HttpConnector(Connector):
     parameters = {}
 
     status_code_msg = {
@@ -21,7 +26,7 @@ class HttpConnector:
         self.parameters['user'] = Authorization.name
         self.parameters['password'] = Authorization.password
         self.demo = demo
-        self.shape = [10,100]
+        self.shape = [10, 100]
 
     def _basic_request(self, name):
         req = 'http://' + self.parameters['baseurl'] + name
@@ -37,13 +42,13 @@ class HttpConnector:
         :return: (requests.Response) response
         """
         req = self._basic_request(name)
-        Authorization = self._authorization()
-        r = requests.get(req, auth=Authorization)
+        auth = self._authorization()
+        r = requests.get(req, auth=auth)
         if r.status_code != requests.codes.ok:
             raise CommunicationError('HTTP request failure')
         return r
 
-    def _get_axis_length(self,r):
+    def _get_axis_length(self, r):
         tag_open = '<td>'
         tag_close = '</td>'
         _axis_length = []
@@ -56,7 +61,7 @@ class HttpConnector:
                 _axis_length.append(int(l[first:last]))
         return _axis_length
 
-    def get_shape(self,name='/admin/showconfig.egi?bank=0'):
+    def get_shape(self, name='/admin/showconfig.egi?bank=0'):
         if not self.demo:
             config = self.get_raw(name)
             self.shape = self._get_axis_length(config)[:-1]
@@ -64,21 +69,21 @@ class HttpConnector:
 
     def get(self, name='/admin/readhmdata.egi?bank=0'):
         if self.demo:
-            return np.random.randint(0,100,np.prod(self.shape))
+            return np.random.randint(0, 100, np.prod(self.shape))
         content = self.get_raw(name).content
         if self.parameters['endianness'] is not 'little':
             content.byteswap()
         return np.frombuffer(content, dtype=np.uint32)
 
 
-class RawFileConnector:
+class RawFileConnector(Connector):
     parameters = {}
 
     def __init__(self, Filename, Endianness='little'):
         self.parameters["filename"] = Filename
         self.parameters['endianness'] = Endianness
 
-    def get(self):
+    def get(self, path):
         content = np.fromfile(self.parameters["filename"], dtype=np.float32)
         if self.parameters['endianness'] is not 'little':
             content.byteswap()
