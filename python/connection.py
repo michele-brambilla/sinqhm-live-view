@@ -38,7 +38,6 @@ class HttpConnector(Connector):
     def get_raw(self, name='/admin/readhmdata.egi?bank=0'):
         """Connect to *baseurl/name* using the GET protocol
         :param name: String to be appended to the *baseurl*
-        :param params: GET parameters to be passed
         :return: (requests.Response) response
         """
         req = self._basic_request(name)

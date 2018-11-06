@@ -60,5 +60,6 @@ class SINQHMView(object):
 
 
 if __name__ == '__main__':
+    """Test program"""
     p = SINQHMView()
     p.live(1)
