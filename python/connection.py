@@ -15,11 +15,13 @@ class HttpConnector:
         500: 'Internal server error',
     }
 
-    def __init__(self, URL, Authorization, Endianness='little'):
+    def __init__(self, URL, Authorization, Endianness='little', demo=None):
         self.parameters['baseurl'] = URL
         self.parameters['endianness'] = Endianness
         self.parameters['user'] = Authorization.name
         self.parameters['password'] = Authorization.password
+        self.demo = demo
+        self.shape = [10,100]
 
     def _basic_request(self, name):
         req = 'http://' + self.parameters['baseurl'] + name
@@ -55,11 +57,14 @@ class HttpConnector:
         return _axis_length
 
     def get_shape(self,name='/admin/showconfig.egi?bank=0'):
-        config = self.get_raw(name)
-        self.shape = self._get_axis_length(config)
+        if not self.demo:
+            config = self.get_raw(name)
+            self.shape = self._get_axis_length(config)[:-1]
         return self.shape
 
     def get(self, name='/admin/readhmdata.egi?bank=0'):
+        if self.demo:
+            return np.random.randint(0,100,np.prod(self.shape))
         content = self.get_raw(name).content
         if self.parameters['endianness'] is not 'little':
             content.byteswap()
